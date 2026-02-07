@@ -3,10 +3,11 @@ name: Rebuild Dashboard
 on:
   # Run manually from the Actions tab
   workflow_dispatch:
-  # Run automatically when data files are added/changed
+  # Run automatically when data files (ZIPs/CSVs) are added/changed
   push:
     paths:
-      - 'data/**'
+      - 'data/*.zip'
+      - 'data/*.csv'
 
 jobs:
   rebuild:
@@ -18,21 +19,37 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Check for data files
+        id: check_data
+        run: |
+          COUNT=$(find ./data/ -name '*.zip' -o -name '*.csv' | grep -v README | wc -l)
+          echo "file_count=$COUNT" >> "$GITHUB_OUTPUT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "⚠️ No data files found in data/ folder. Skipping rebuild."
+          else
+            echo "✅ Found $COUNT data file(s). Proceeding with rebuild."
+          fi
+
       - name: Set up Python
+        if: steps.check_data.outputs.file_count != '0'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
+        if: steps.check_data.outputs.file_count != '0'
         run: pip install pandas
 
       - name: Run preprocessing
+        if: steps.check_data.outputs.file_count != '0'
         run: python scripts/preprocess.py --data-dir ./data/
 
       - name: Build dashboard
+        if: steps.check_data.outputs.file_count != '0'
         run: python scripts/build_dashboard.py
 
       - name: Commit and push updated dashboard
+        if: steps.check_data.outputs.file_count != '0'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
