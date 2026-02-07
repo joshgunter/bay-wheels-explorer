@@ -93,7 +93,7 @@ th.sorted .sort-icon{{opacity:1;color:var(--accent)}}
 <body>
 <div class="hero">
 <h1><span class="icon">\U0001F6B2</span> Bay Wheels Explorer</h1>
-<p class="sub">Interactive analysis of 21.5M+ rides across the San Francisco Bay Area \u2022 Jun 2017 \u2013 Jan 2026</p>
+<p class="sub" id="heroSub"></p>
 <div class="stats-row" id="heroStats"></div>
 </div>
 <nav class="tabs" id="tabs">
@@ -215,6 +215,8 @@ const fmtPct = p => p.toFixed(1) + '%';
 // ===================== HERO STATS =====================
 (function(){{
 const s = DATA.summary;
+const tripM = (s.total_trips / 1e6).toFixed(1);
+document.getElementById('heroSub').textContent = 'Interactive analysis of ' + tripM + 'M+ rides across the San Francisco Bay Area \u2022 ' + s.date_range_start.slice(0,7).replace('-',' ') + ' \u2013 ' + s.date_range_end.slice(0,7).replace('-',' ');
 const el = document.getElementById('heroStats');
 const items = [
   ['Total Trips', fmt(s.total_trips)],
