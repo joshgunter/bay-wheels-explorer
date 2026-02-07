@@ -1,18 +1,27 @@
 """
 Memory-efficient preprocessing: process each ZIP file individually,
 aggregate incrementally, and write compact JSON.
+
+Usage:
+    python scripts/preprocess.py --data-dir ./data/
 """
 import pandas as pd
 import zipfile
 import os
 import json
 import glob
+import argparse
 from collections import defaultdict
 import traceback
 import gc
 
-DATA_DIR = "/sessions/trusting-nifty-gauss/mnt/Bay Wheels Data/"
-WORK_DIR = "/sessions/trusting-nifty-gauss/baywheels_work/"
+parser = argparse.ArgumentParser(description='Preprocess Bay Wheels trip data')
+parser.add_argument('--data-dir', default='./data/', help='Directory containing ZIP/CSV files')
+parser.add_argument('--output', default='./dashboard_data.json', help='Output JSON path')
+args = parser.parse_args()
+
+DATA_DIR = args.data_dir
+WORK_DIR = os.path.dirname(args.output) or '.'
 
 zip_files = sorted(glob.glob(os.path.join(DATA_DIR, "*.zip")))
 print(f"Found {len(zip_files)} zip files")
@@ -291,7 +300,7 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         return super().default(obj)
 
-out_path = os.path.join(WORK_DIR, 'dashboard_data.json')
+out_path = args.output
 with open(out_path, 'w') as f:
     json.dump(output, f, cls=NumpyEncoder)
 

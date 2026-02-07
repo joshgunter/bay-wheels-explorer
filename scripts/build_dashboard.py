@@ -1,9 +1,19 @@
 """
 Build the complete Bay Wheels dashboard HTML with embedded data.
+
+Usage:
+    python scripts/build_dashboard.py
+    python scripts/build_dashboard.py --input ./dashboard_data.json --output ./index.html
 """
 import json
+import argparse
 
-with open('/sessions/trusting-nifty-gauss/baywheels_work/dashboard_data.json') as f:
+parser = argparse.ArgumentParser(description='Build Bay Wheels dashboard HTML')
+parser.add_argument('--input', default='./dashboard_data.json', help='Input JSON data path')
+parser.add_argument('--output', default='./index.html', help='Output HTML path')
+args = parser.parse_args()
+
+with open(args.input) as f:
     data = json.load(f)
 
 data_json = json.dumps(data, separators=(',', ':'))
@@ -762,9 +772,8 @@ document.querySelectorAll('#dowToggles .toggle-btn').forEach(btn => {{
 </body>
 </html>'''
 
-out_path = "/sessions/trusting-nifty-gauss/mnt/Bay Wheels Data/bay-wheels-explorer.html"
-with open(out_path, 'w') as f:
+with open(args.output, 'w') as f:
     f.write(html)
 
-print(f"Dashboard written to: {out_path}")
+print(f"Dashboard written to: {args.output}")
 print(f"File size: {len(html) / 1024 / 1024:.2f} MB")
